@@ -5,7 +5,7 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class Spark : MonoBehaviour {
 	[Range(2,50)]
-    public int vertexNum = 4;
+    public int vertexNum = 4; 
 	public Material material;
 
     private void OnRenderObject() {
