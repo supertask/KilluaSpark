@@ -7,7 +7,7 @@
         _ScaleY ("Scale Y", Float) = 1
         _Speed ("Speed",Float) = 1
 
-        _Throttle ("Throttle",Float) = 0.8 //0.1~1.0
+        _Throttle ("Throttle",Float) = 0.04 //0.1~1.0
         _Seed ("Seed",int) = 20
 	}
 	SubShader
@@ -129,8 +129,8 @@
                 //v.color = _Color * intensity(seed);
 
                 v.vertex.xyz = pos;
-                v.color = _Color;
-                //v.color = _Color * intensity(seed);
+                //v.color = _Color;
+                v.color = _Color * intensity(seed);
                 //return o;
 			}
 

@@ -329,7 +329,7 @@ GameObject:
   - component: {fileID: 1111040620}
   - component: {fileID: 1111040621}
   m_Layer: 0
-  m_Name: Spark
+  m_Name: SparkFinger1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -361,10 +361,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vertexNum: 11
   _material: {fileID: 2100000, guid: d90a33a06d73f4242b0a930832b7a4df, type: 2}
-  _mesh: {fileID: 11400000, guid: fb35999eca42747c48286a1610df4e59, type: 2}
-  _pulseInterval: 0.2
+  _mesh: {fileID: 11400000, guid: b25ba4318b7a4497fb4bc8eb8027e17f, type: 2}
+  _pulseInterval: 0.01
   _boltLength: 0.85
   _lengthRandomness: 0.8
   _noiseFrequency: 0.1
   _noiseMotion: 0.1
   _noiseAmplitude: 1.2
+  p0: {x: -50, y: 0, z: 0}
+  p1: {x: 50, y: 0, z: 0}

@@ -21,11 +21,12 @@ namespace Lightning
 		[SerializeField] public float _noiseMotion = 0.1f;
 		[SerializeField] public float _noiseAmplitude = 1.2f;
 
+		[SerializeField] public Vector3 p0 = new Vector3(-50, 0, 0);
+		[SerializeField] public Vector3 p1 = new Vector3(50, 0, 0);
+
 		//void OnRenderObject()
 		void Update()
 		{
-			Vector3 p0 = new Vector3(-300, 0, 0);
-			Vector3 p1 = new Vector3(300, 0, 0);
 			_material.SetVector("_Point0", p0);
             _material.SetVector("_Point1", p1);
             _material.SetFloat("_Distance", (p1 - p0).magnitude);
@@ -44,7 +45,10 @@ namespace Lightning
 			_material.SetVector("_NoiseAmplitude", new Vector2(1, 0.1f) * _noiseAmplitude);
 
 			_material.SetVector("_Interval", new Vector2(0.01f, _pulseInterval - 0.01f));
-            _material.SetVector("_Length", new Vector2(1 - _lengthRandomness, 10) * _boltLength);
+
+            //lightningの長さはある程度長い方がキルアのに近く
+            //_material.SetVector("_Length", new Vector2(1 - _lengthRandomness, 10) * _boltLength);
+			_material.SetVector("_Length", new Vector2(3 - _lengthRandomness, 10) * _boltLength);
 			_material.SetInt("_VertexNum", vertexNum - 1);
 			_material.SetPass(0);
             

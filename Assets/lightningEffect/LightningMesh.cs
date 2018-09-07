@@ -31,7 +31,7 @@ namespace Lightning
         #region Public Properties
 
         [SerializeField]
-        int _lineCount = 20;
+        int _lineCount = 5;
 
         public int lineCount {
             get { return _lineCount; }
