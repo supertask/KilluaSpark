@@ -1,8 +1,14 @@
-﻿Shader "Unlit/Spark"
+﻿/*
+ * 距離に応じて_NoiseAmplitudeと楕円半径を変えてやり，
+ * 距離が遠ければノイズが大きく楕円が大きく，
+ * 距離が短ければノイズが小さく楕円が小さいというように
+ *
+ */
+Shader "Unlit/Spark"
 {
 	Properties
 	{
-        _Color ("Color", Color) = (1,1,1,1)
+        [HDR] _Color ("Color", Color) = (1,1,1,1)
         _ScaleX ("Scale X", Float) = 1
         _ScaleY ("Scale Y", Float) = 1
         _Speed ("Speed",Float) = 1
@@ -78,6 +84,21 @@
                 return snoise(np1) * _NoiseAmplitude.x + snoise(np2) * _NoiseAmplitude.y;
             }
 
+            float middle_point(float3 p0, float3 p1) {
+                return p0 + (p1 - p0) / 2;
+            }
+
+            float ellipse_y(float x) {
+                // 楕円形にする
+                float3 p0 = _Point0;
+                float3 p1 = _Point1;
+                float half_dis = distance(p0, p1) / 2.0;
+                float a = half_dis;
+                float b = half_dis * 0.0015; // * m;
+                float y = b * sqrt(half_dis*half_dis - x * x / a * a);
+                return y;
+            }
+
 			//v2f vert (uint id : SV_VertexID)
             void vert(inout appdata_full v)
 			{
@@ -108,7 +129,9 @@
                 float d0 = displace(pp01 * _Distance, t, seed *  13.45);
                 float d1 = displace(pp01 * _Distance, t, seed * -21.73);
                 //float3 pos = lerp(_Point0, _Point1, pp01) + d0 * _Asis1 + d1 * _Asis2;
-                float3 pos = lerp(_Point0, _Point1, pp01) + float3(1,7,4) * d0 + float3(1,7,4) * d1;
+                float3 pos = lerp(_Point0, _Point1, pp01);
+                pos += d0 + d1;
+                pos.y += ellipse_y(pos.x);
 
                 /*
                 float timex = _Time.y * _Speed * 0.1365143f;
@@ -134,16 +157,8 @@
                 //return o;
 			}
 
-            /*
-            fixed4 frag (v2f i) : SV_Target {
-                clip(i.color.r);
-                return i.color;
-            }
-            */
-
             void surf(Input IN, inout SurfaceOutputStandard o) {
                 clip(IN.color.r);
-                //o.Albedo = IN.color.rgb;
                 o.Emission = IN.color.rgb;
             }
 			ENDCG

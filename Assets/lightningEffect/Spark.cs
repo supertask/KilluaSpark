@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace Lightning
 {
-	//[ExecuteInEditMode]
+	[ExecuteInEditMode]
 	public class Spark : MonoBehaviour
 	{
 
@@ -59,5 +59,12 @@ namespace Lightning
             Graphics.DrawMesh(_mesh.sharedMesh, transform.localToWorldMatrix,
 				_material, 0, null, 0, _materialProps);
 		}
+
+        void OnDrawGizmos() {
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawSphere(this.p0, this._noiseAmplitude);
+			Gizmos.DrawSphere(this.p1, this._noiseAmplitude);
+        }
+
 	}
 }
