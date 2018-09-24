@@ -11,6 +11,7 @@ namespace Lightning
         LeapServiceProvider m_Provider;
         Camera camera;
         GameObject originLightningObj;
+        Vector3 baseEulerAngle;
 
         // Use this for initialization
         void Start()
@@ -18,13 +19,15 @@ namespace Lightning
             this.m_Provider = GameObject.Find("LeapHandController").GetComponent<LeapServiceProvider>();
             this.camera = GameObject.Find("Main Camera").GetComponent<Camera>();
             this.originLightningObj = GameObject.Find("LightningFinger");
+            this.baseEulerAngle = new Vector3(270, 90, 0); //基底となるオイラー角（左手の指先が上，親指が右の状態）
         }
 
-        public static Vector3 ToVector3(Vector v) { return new Vector3(v.x, v.y, v.z); }
 
-        private GameObject CloneLightning(int fingerIndex, Vector3 emitterPos, Vector3 receiverPos) {
+        private GameObject CloneLightning(int fingerIndex,
+                Vector3 emitterPos, Vector3 receiverPos, Vector3 fingerNormal) {
             GameObject lightningObj = GameObject.Find("LightningFinger" + fingerIndex);
             if (lightningObj == null) {
+                //Lightningオブジェクトとマテリアルをそれぞれ複製
                 lightningObj = Object.Instantiate(originLightningObj) as GameObject;
                 Material mat = Material.Instantiate(originLightningObj.GetComponent<Lightning>()._material);
                 lightningObj.name = "LightningFinger" + fingerIndex;
@@ -35,6 +38,9 @@ namespace Lightning
             light.emitter = emitterPos;
             light.receiver = receiverPos;
             light._Seed = 2 * fingerIndex * fingerIndex + 3 * fingerIndex + 8;
+            light._material.SetVector("_FingerNormal",
+                fingerNormal);
+
             return lightningObj;
         }
         private void DeleteLightning(int fingerIndex) {
@@ -48,17 +54,25 @@ namespace Lightning
             //Debug.Log(this.camera.transform.up);
             Frame frame = this.m_Provider.CurrentFrame;
             if (frame.Hands.Count < 2) {
+                for (int i = 0; i < 5; i++) { this.DeleteLightning(i); }
                 return;
             }
 
             Hand leftHand = frame.Hands[0].IsLeft ? frame.Hands[0] : frame.Hands[1];
             Hand rightHand = frame.Hands[1].IsRight ? frame.Hands[1] : frame.Hands[0];
+            Vector3 handCenter = Vector3.Lerp(LeapUtils.ToVector3(rightHand.PalmPosition),
+                    LeapUtils.ToVector3(leftHand.PalmPosition), 0.5f);
+
             for (int i = 0; i < 5; i++) {
                 if (leftHand.Fingers[i].IsExtended && rightHand.Fingers[i].IsExtended) {
                     //光らせる
-                    Vector3 emitterPos = LightningController.ToVector3(leftHand.Fingers[i].TipPosition);
-                    Vector3 receiverPos = LightningController.ToVector3(rightHand.Fingers[i].TipPosition);
-                    this.CloneLightning(i, emitterPos, receiverPos);
+                    Vector3 emitterPos = LeapUtils.ToVector3(leftHand.Fingers[i].TipPosition);
+                    Vector3 receiverPos = LeapUtils.ToVector3(rightHand.Fingers[i].TipPosition);
+                    Vector3 fingerCenter = Vector3.Lerp(emitterPos, receiverPos, 0.5f);
+                    Vector3 fingerNormal = (fingerCenter - handCenter).normalized;
+
+                    Debug.DrawLine(fingerCenter, fingerCenter + 20 * fingerNormal, Color.white);
+                    this.CloneLightning(i, emitterPos, receiverPos, fingerNormal);
                 }
                 else {
                     //光を消す
@@ -68,8 +82,8 @@ namespace Lightning
 
             /*
             foreach (Hand hand in frame.Hands) {
-                Vector3 leapPosition = LightningController.ToVector3(hand.PalmPosition);
-                Vector3 leapVelocity = LightningController.ToVector3(hand.PalmVelocity);
+                Vector3 leapPosition = LeapUtils.ToVector3(hand.PalmPosition);
+                Vector3 leapVelocity = LeapUtils.ToVector3(hand.PalmVelocity);
                 //Debug.Log("actual pos: " + leapPosition);
                 //Debug.Log("actual velocity: " + leapVelocity.normalized);
 

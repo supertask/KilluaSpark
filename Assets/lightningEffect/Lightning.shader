@@ -51,9 +51,38 @@ Shader "Unlit/Lightning"
             float3 _Asis0;
             float3 _Asis1;
             float3 _Asis2;
+			float3 _FingerNormal;
 
             float4 _Color;
             int _VertexNum;
+
+			/*
+			 * オイラー角（ラジアン）を回転行列に変換
+			 */
+			float4x4 eulerAnglesToRotationMatrix(float3 angles)
+			//float3x3 eulerAnglesToRotationMatrix(float3 angles)
+			{
+				float ch = cos(angles.y); float sh = sin(angles.y); // heading
+				float ca = cos(angles.z); float sa = sin(angles.z); // attitude
+				float cb = cos(angles.x); float sb = sin(angles.x); // bank
+
+				// Ry-Rx-Rz (Yaw Pitch Roll)
+				return float4x4(
+					ch * ca + sh * sb * sa, -ch * sa + sh * sb * ca, sh * cb, 0,
+					cb * sa, cb * ca, -sb, 0,
+					-sh * ca + ch * sb * sa, sh * sa + ch * sb * ca, ch * cb, 0,
+					0, 0, 0, 1
+				);
+				/*
+				// Ry-Rx-Rz (Yaw Pitch Roll)
+				return float3x3(
+					ch * ca + sh * sb * sa, -ch * sa + sh * sb * ca, sh * cb,
+					cb * sa, cb * ca, -sb,
+					-sh * ca + ch * sb * sa, sh * sa + ch * sb * ca, ch * cb
+				);
+				*/
+			}
+
 
             // pseudo random number generator
             float nrand01(float seed, float salt)
@@ -85,10 +114,24 @@ Shader "Unlit/Lightning"
                 float3 p1 = _Point1;
                 float half_dis = distance(p0, p1) / 2.0;
                 float a = half_dis;
-                float b = half_dis * 0.075; //円の大きさを決める
+                float b = half_dis * 0.085; //円の大きさを決める
                 float y = b * sqrt(half_dis*half_dis - x * x / a * a);
                 return y;
             }
+
+			/*
+            float ellipse_y(float x) {
+                // 楕円形にする
+                float3 p0 = _Point0;
+                float3 p1 = _Point1;
+				float3 m = lerp(p0, p1, 0.5);
+                float half_dis = distance(p0, p1) / 2.0;
+                float a = half_dis;
+                float b = half_dis * 0.075; //円の大きさを決める
+                float y = b * sqrt(half_dis*half_dis - (x-m.x) * (x-m.x) / a * a) + m.y;
+                return y;
+            }
+			*/
 
 			//v2f vert (uint id : SV_VertexID)
             void vert(inout appdata_full v)
@@ -124,7 +167,9 @@ Shader "Unlit/Lightning"
 				float decrease = float3(0.2, 0.2, 0.2);
                 float3 pos = lerp(_Point0, _Point1, pp01);
                 pos += decrease * d0 + decrease * d1;
-                pos.y += ellipse_y(pos.x);
+
+				float power_y = ellipse_y(pos.x);
+				pos += power_y * _FingerNormal;
 
                 /*
                 float timex = _Time.y * _Speed * 0.1365143f;

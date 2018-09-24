@@ -67,11 +67,8 @@ namespace Lightning
 
         void OnDrawGizmos() {
 			Gizmos.color = Color.yellow;
-			//Gizmos.DrawSphere(this.emitter + this._lightningObj.transform.position, this._noiseAmplitude);
-			//Gizmos.DrawSphere(this.receiver + this._lightningObj.transform.position, this._noiseAmplitude);
-			Gizmos.DrawSphere(this.emitter, this._noiseAmplitude);
-			Gizmos.DrawSphere(this.receiver, this._noiseAmplitude);
-
+			//Gizmos.DrawSphere(this.emitter, this._noiseAmplitude);
+			//Gizmos.DrawSphere(this.receiver, this._noiseAmplitude);
         }
 	}
 }
